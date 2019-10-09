@@ -1,40 +1,48 @@
 import discord
+from discord.ext import commands
 import asyncio
-client = discord.Client()
 
+#update the variables below with your information
+token = "TOKEN"
+prefix = "PREFIX"
 
-@client.event
+bot = commands.Bot(command_prefix=prefix, case_insensitive=True)
+
+@bot.event
 async def on_ready():
     print("Logged in as:")
-    print(client.user.name)
-    print(client.user.id)
+    print(bot.user.name)
+    print(bot.user.id)
     print('------')
 
-
-@client.event
-async def on_message(message):
-    if message.content.startswith("!test"):
-        await client.send_message(message.channel, "test")
-
 # notify users when they mute themselves
-@client.event
+@bot.event
 async def on_voice_state_update(before, after):
-    print("voice state changed")
+    print("Voice Status Update!")
     muted_user = after
     str_mention = muted_user.mention
     if muted_user.voice.self_mute:
-        await client.send_message(client.get_channel("157183056413851650"), "{}, you're muted".format(str_mention))
+        await bot.get_channel("157183056413851650").send(f"{str_mention}, you're muted")
 
 # ping when a user comes online
-@client.event
-async def on_member_update(before,after):
+@bot.event
+async def on_member_update(before, after):
     if str(before.status) == "offline":
         if str(after.status) == "online" or str(after.status) == "idle":
-            await client.send_message(client.get_channel("157183056413851650"), "{} just came online.".format(after.mention))
+            await bot.get_channel("157183056413851650").send(f"{after.mention} just came online.")
 
+#made this a command because on_message listeners are resource heavy
+@bot.command
+async def forsene(ctx):
+    #added a description visible in the help command
+    """Command to display the forsenE Emoji Quadruplet."""
+    await ctx.send("<:forsen1:442133101896925194><:forsen2:442133102131806208>\n<:forsen3:442133101905444864><:forsen4:442133101959970816>")
 
-@client.event
-async def on_message(message):
-    if message.content.startswith("forsenE"):
-        await client.send_message(message.channel, "<:forsen1:442133101896925194><:forsen2:442133102131806208>\n<:forsen3:442133101905444864><:forsen4:442133101959970816>")
-client.run("NTEwNTY5ODMwNzQzODAxODk1.DseRCA.qMJpNtao5jFXGXrG0RusByeqFGY")
+#made this a command because on_message listeners are resource heavy
+@bot.command
+async def test(ctx):
+    #added a description visible in the help command
+    """A command that returns Testing! Can be used to check if the bot is online."""
+    await ctx.send("Testing!")
+
+bot.run(token, bot=True, reconnect=True)
